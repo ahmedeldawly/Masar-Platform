@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+export const dynamic = "force-dynamic";
 
 const baseUrl = process.env.PAYMOB_BASE_URL || "https://accept.paymob.com/api";
 

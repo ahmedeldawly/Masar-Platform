@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+export const dynamic = "force-dynamic";
 
 const fallbackDetails = {
   id: "1",

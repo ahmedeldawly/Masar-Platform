@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+export const dynamic = "force-dynamic";
 
 export default async function PurchaseDetailsPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);

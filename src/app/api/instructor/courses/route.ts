@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+export const dynamic = "force-dynamic";
 
 const createCourseSchema = z.object({
   title: z.string().min(3, "عنوان الكورس مطلوب").max(150),

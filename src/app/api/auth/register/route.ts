@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { prisma } from "@/lib/db";
+export const dynamic = "force-dynamic";
 import { hashPassword } from "@/lib/hash";
 import { registerSchema } from "@/lib/validation/auth";
 

@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+export const dynamic = "force-dynamic";
 import { finalizePayment } from "@/lib/payments";
 
 export async function POST(req: Request) {

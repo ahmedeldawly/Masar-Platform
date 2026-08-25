@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+export const dynamic = "force-dynamic";
 
 const checkoutSchema = z.object({
   courseId: z.string().min(1),
