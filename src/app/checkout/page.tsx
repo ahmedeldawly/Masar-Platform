@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -220,5 +220,9 @@ function LegacyCheckoutPage() {
 }
 
 export default function CheckoutPage() {
-  return <CheckoutProviders />;
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-slate-950" />}>
+      <CheckoutProviders />
+    </Suspense>
+  );
 }
