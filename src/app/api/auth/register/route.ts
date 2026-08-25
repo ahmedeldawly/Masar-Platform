@@ -8,6 +8,13 @@ import { registerSchema } from "@/lib/validation/auth";
 
 export async function POST(req: Request) {
   try {
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json(
+        { error: "DATABASE_NOT_CONFIGURED" },
+        { status: 503 }
+      );
+    }
+
     const body = await req.json();
     const parsed = registerSchema.safeParse(body);
 
@@ -78,6 +85,12 @@ export async function POST(req: Request) {
     ) {
       return NextResponse.json(
         { error: "DATABASE_SCHEMA_MISSING" },
+        { status: 503 }
+      );
+    }
+    if (err instanceof Prisma.PrismaClientInitializationError) {
+      return NextResponse.json(
+        { error: "DATABASE_CONNECTION_FAILED" },
         { status: 503 }
       );
     }

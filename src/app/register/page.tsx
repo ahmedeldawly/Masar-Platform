@@ -43,8 +43,12 @@ export default function RegisterPage() {
       }
       if (!res.ok) {
         setServerError(
-          payload?.error === "DATABASE_SCHEMA_MISSING"
-            ? "قاعدة البيانات غير جاهزة بعد. تواصل مع إدارة المنصة."
+          payload?.error === "DATABASE_NOT_CONFIGURED"
+            ? "لم يتم إعداد قاعدة البيانات على الخادم."
+            : payload?.error === "DATABASE_CONNECTION_FAILED"
+              ? "تعذر الاتصال بقاعدة البيانات."
+              : payload?.error === "DATABASE_SCHEMA_MISSING"
+                ? "قاعدة البيانات غير جاهزة بعد. تواصل مع إدارة المنصة."
             : payload?.details?.fieldErrors
               ? "راجع البيانات المدخلة وحاول مرة أخرى."
               : "حدث خطأ في الخادم، حاول مرة أخرى."
