@@ -43,9 +43,11 @@ export default function RegisterPage() {
       }
       if (!res.ok) {
         setServerError(
-          payload?.details?.fieldErrors
-            ? "راجع البيانات المدخلة وحاول مرة أخرى."
-            : "حدث خطأ في الخادم، حاول مرة أخرى."
+          payload?.error === "DATABASE_SCHEMA_MISSING"
+            ? "قاعدة البيانات غير جاهزة بعد. تواصل مع إدارة المنصة."
+            : payload?.details?.fieldErrors
+              ? "راجع البيانات المدخلة وحاول مرة أخرى."
+              : "حدث خطأ في الخادم، حاول مرة أخرى."
         );
         return;
       }

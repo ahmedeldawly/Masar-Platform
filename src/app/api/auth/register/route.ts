@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 export const dynamic = "force-dynamic";
 import { hashPassword } from "@/lib/hash";
@@ -30,27 +31,28 @@ export async function POST(req: Request) {
 
     const passwordHash = await hashPassword(password);
 
-    const user = await prisma.user.create({
-      data: {
-        fullName,
-        email,
-        phone: phone || null,
-        passwordHash,
-        role,
-        ...(role === "INSTRUCTOR" ? { instructorProfile: { create: {} } } : {}),
-      },
-    });
-
-    // Generate an email verification token (real record, expires in 24h).
-    // Actual email delivery (SMTP / provider) is wired up in Phase 2 —
-    // for now the token is created and can be sent manually or logged.
     const token = randomBytes(32).toString("hex");
-    await prisma.verificationToken.create({
-      data: {
-        userId: user.id,
-        token,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      },
+    const user = await prisma.$transaction(async (transaction) => {
+      const createdUser = await transaction.user.create({
+        data: {
+          fullName,
+          email,
+          phone: phone || null,
+          passwordHash,
+          role,
+          ...(role === "INSTRUCTOR" ? { instructorProfile: { create: {} } } : {}),
+        },
+      });
+
+      await transaction.verificationToken.create({
+        data: {
+          userId: createdUser.id,
+          token,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
+      });
+
+      return createdUser;
     });
 
     return NextResponse.json(
@@ -64,10 +66,19 @@ export async function POST(req: Request) {
     );
   } catch (err) {
     console.error("Register error:", err);
-    if (err && typeof err === "object" && "code" in err && err.code === "P2002") {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
       return NextResponse.json(
         { error: "EMAIL_ALREADY_EXISTS" },
         { status: 409 }
+      );
+    }
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      (err.code === "P2021" || err.code === "P2022")
+    ) {
+      return NextResponse.json(
+        { error: "DATABASE_SCHEMA_MISSING" },
+        { status: 503 }
       );
     }
     return NextResponse.json({ error: "SERVER_ERROR" }, { status: 500 });
