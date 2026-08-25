@@ -17,7 +17,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const { fullName, email, phone, password, role } = parsed.data;
+    const { fullName, phone, password, role } = parsed.data;
+    const email = parsed.data.email.trim().toLowerCase();
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -63,6 +64,12 @@ export async function POST(req: Request) {
     );
   } catch (err) {
     console.error("Register error:", err);
+    if (err && typeof err === "object" && "code" in err && err.code === "P2002") {
+      return NextResponse.json(
+        { error: "EMAIL_ALREADY_EXISTS" },
+        { status: 409 }
+      );
+    }
     return NextResponse.json({ error: "SERVER_ERROR" }, { status: 500 });
   }
 }

@@ -4,12 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
 import { registerSchema, type RegisterInput } from "@/lib/validation/auth";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -32,16 +35,24 @@ export default function RegisterPage() {
         body: JSON.stringify(data),
       });
 
+      const payload = await res.json().catch(() => null);
+
       if (res.status === 409) {
         setServerError("البريد الإلكتروني مستخدم بالفعل.");
         return;
       }
       if (!res.ok) {
-        setServerError("حدث خطأ، حاول مرة أخرى.");
+        setServerError(
+          payload?.details?.fieldErrors
+            ? "راجع البيانات المدخلة وحاول مرة أخرى."
+            : "حدث خطأ في الخادم، حاول مرة أخرى."
+        );
         return;
       }
 
       router.push("/login?registered=1");
+    } catch {
+      setServerError("تعذر الاتصال بالخادم. تحقق من الإنترنت وحاول مرة أخرى.");
     } finally {
       setSubmitting(false);
     }
@@ -146,12 +157,22 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <input
-                    className="input-field"
-                    type="password"
-                    placeholder="كلمة المرور"
-                    {...register("password")}
-                  />
+                  <div className="relative">
+                    <input
+                      className="input-field pl-12"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="كلمة المرور"
+                      {...register("password")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition hover:text-white"
+                      aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                   {errors.password && (
                     <p className="mt-1 text-sm text-pink-300">
                       {errors.password.message}
@@ -160,12 +181,22 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <input
-                    className="input-field"
-                    type="password"
-                    placeholder="تأكيد كلمة المرور"
-                    {...register("confirmPassword")}
-                  />
+                  <div className="relative">
+                    <input
+                      className="input-field pl-12"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="تأكيد كلمة المرور"
+                      {...register("confirmPassword")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((visible) => !visible)}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition hover:text-white"
+                      aria-label={showConfirmPassword ? "إخفاء تأكيد كلمة المرور" : "إظهار تأكيد كلمة المرور"}
+                    >
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                   {errors.confirmPassword && (
                     <p className="mt-1 text-sm text-pink-300">
                       {errors.confirmPassword.message}
